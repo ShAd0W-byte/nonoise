@@ -1,246 +1,481 @@
+# NoN0is3 – Silent Recon
 
-```markdown
-# NoN0is3 - Silent Recon
+NoN0is3 is a passive-first reconnaissance tool focused on collecting high-value attack surface with minimal noise.  
+It is designed for security researchers, bug bounty hunters, and penetration testers who want structured, filtered recon output instead of large volumes of irrelevant data.
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.8+-green.svg)
-![License](https://img.shields.io/badge/license-MIT-orange.svg)
+Created by **ShAd0W-byte**
 
-A passive-first reconnaissance tool focused on signal, not noise. Designed to collect, filter, and prioritize attack-relevant URLs.
+---
 
-## Features
+## What NoN0is3 Does
 
-- 🔍 **Passive Subdomain Discovery** - VirusTotal, SecurityTrails, crt.sh
-- 🌐 **Multi-Source URL Collection** - Wayback Machine, CommonCrawl, AlienVault
-- 🎯 **Smart Filtering** - Two-stage filtering to remove noise
-- ⚡ **High Performance** - Concurrent processing with configurable workers
-- 🔧 **WordPress Scanner** - Optional WordPress-specific enumeration
-- 💾 **Cross-Platform** - Works on Windows, Linux, and macOS
+- Passive subdomain discovery (API-based + public sources)
+    
+- Multi-source historical URL collection
+    
+- Intelligent filtering to remove low-value noise
+    
+- Concurrent URL validation
+    
+- Optional WordPress enumeration
+    
+- Cross-platform support (Linux, Windows)
+    
 
-## Installation
+---
 
-### From PyPI (Recommended)
+# Installation
 
-```bash
-pip install nonoise
+## Linux (Kali, Ubuntu, Debian, etc.)
+
+### Step 1 — Clone the Repository
+
+```
+git clone https://github.com/ShAd0W-byte/nonoise.git
+cd nonoise
 ```
 
-### From Source
+### Step 2 — Create a Python Virtual Environment (Required on Kali)
 
-```bash
-git clone https://github.com/yourusername/nonoise.git
-cd nonoise
+Kali Linux and similar systems restrict global pip installations.  
+You must use a virtual environment.
+
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Your terminal should now display `(venv)`.
+
+### Step 3 — Install Dependencies
+
+```
+pip install -r requirements.txt
 pip install -e .
 ```
 
-### Requirements
+Test installation:
 
-- Python 3.8 or higher
-- Internet connection
-- (Optional) VirusTotal API key
-- (Optional) SecurityTrails API key
+```
+nonoise -h
+```
 
-## Quick Start
+---
 
-```bash
-# Basic scan
-nonoise -d example.com
+## Windows Installation
 
-# With WordPress enumeration
-nonoise -d example.com -w
+### Step 1 — Clone Repository
 
-# Custom thread count
-nonoise -d example.com -t 100
+```
+git clone https://github.com/ShAd0W-byte/nonoise.git
+cd nonoise
+```
 
-# Skip subdomain discovery
-nonoise -d example.com -sd
+### Step 2 — Create Virtual Environment
 
-# Interactive mode
+```
+python -m venv venv
+venv\Scripts\activate
+```
+
+### Step 3 — Install
+
+```
+pip install -r requirements.txt
+pip install -e .
+```
+
+Test:
+
+```
+nonoise -h
+```
+
+---
+
+# First-Time Usage (Recommended)
+
+If this is your first time using NoN0is3, use interactive mode:
+
+```
 nonoise --interactive
 ```
 
-## Usage
+Interactive mode guides you step-by-step and reduces input mistakes.
 
-### Command Line Options
+---
+
+# Command Line Usage
 
 ```
 nonoise [options]
-
-Options:
-  -d,  --domain              Target domain (example.com)
-  -t,  --threads             Concurrent workers for URL visiting (default: 70)
-  -w,  --wordpress           Enable WordPress-specific enumeration
-  -sd, --skip-subdomains     Skip passive subdomain discovery
-  -vapi, --virustotal-api    Set/update VirusTotal API key
-  -sapi, --securitytrails-api Set/update SecurityTrails API key
-  -i,  --interactive         Start interactive mode
-  -h,  --help                Show help message
-  -v,  --version             Show version
 ```
 
-### API Keys Setup
+---
 
-```bash
-# Set VirusTotal API key
-nonoise -vapi YOUR_VT_API_KEY
+## Options Explained
 
-# Set SecurityTrails API key
-nonoise -sapi YOUR_ST_API_KEY
+### -d, --domain
+
+Specifies the target domain.
+
+Example:
+
 ```
-
-API keys are stored in `~/.config/nonoise/config.json`
-
-### Important: Domain Format
-
-Enter the EXACT domain format you want to scan:
-- If the site uses `www.example.com` → enter `www.example.com`
-- If the site uses `example.com` → enter `example.com`
-- Wrong format will break subdomain enumeration
-
-## Output
-
-NoN0is3 generates the following outputs:
-
-- `nonoise_output/` - Directory containing validated URLs
-  - `{domain}_visited.txt` - URLs with status codes
-- `subdomains_discovered.txt` - List of discovered subdomains (if enabled)
-- `wordpress_results.txt` - WordPress enumeration results (if enabled)
-
-## Architecture
-
-### Pipeline Stages
-
-1. **Subdomain Discovery** (Optional)
-   - VirusTotal API
-   - SecurityTrails API
-   - crt.sh
-   - Live domain validation
-
-2. **URL Collection**
-   - Wayback Machine
-   - CommonCrawl (all indexes)
-   - AlienVault OTX
-   - Generated URLs (wordlist + cloud patterns)
-
-3. **Filtering Stage 1**
-   - Remove tracking parameters
-   - Filter file extensions
-   - Remove framework/CMS paths
-   - Remove pagination URLs
-   - Filter legal/info pages
-
-4. **Filtering Stage 2**
-   - Queue-based fan-out detection
-   - Path depth analysis
-   - Canonical key deduplication
-
-5. **URL Validation**
-   - Concurrent HEAD/GET requests
-   - Status code validation
-   - 301 redirect filtering
-
-6. **WordPress Scanner** (Optional)
-   - Async path enumeration
-   - Fixed concurrency (30)
-   - Top 500 WordPress paths
-
-## Performance
-
-- Default: 70 concurrent workers for URL visiting
-- WordPress: Fixed 30 concurrent requests
-- CommonCrawl: Up to 15 concurrent index queries
-- Subdomain validation: 40 concurrent checks
-
-## Configuration
-
-Config file location: `~/.config/nonoise/config.json`
-
-```json
-{
-  "virustotal_api_key": "your_key_here",
-  "securitytrails_api_key": "your_key_here"
-}
-```
-
-## Examples
-
-### Basic Domain Scan
-
-```bash
 nonoise -d example.com
 ```
 
-### Full Scan with WordPress
+Required unless using interactive mode.
 
-```bash
-nonoise -d www.example.com -w -t 100
+---
+
+### -t, --threads
+
+Sets the number of concurrent workers used for URL validation.
+
+Default: 70
+
+Higher value increases speed but may cause:
+
+- Rate limits
+    
+- Timeouts
+    
+- Connection errors
+    
+
+Example:
+
+```
+nonoise -d example.com -t 100
 ```
 
-### Multiple Domains (Interactive)
+---
 
-```bash
+### -w, --wordpress
+
+Enables WordPress-specific enumeration.
+
+Scans common WordPress paths and assets.
+
+Example:
+
+```
+nonoise -d example.com -w
+```
+
+---
+
+### -sd, --skip-subdomains
+
+Skips passive subdomain discovery.
+
+Useful if:
+
+- You already have subdomains
+    
+- You want faster execution
+    
+- You do not want to use API-based discovery
+    
+
+Example:
+
+```
+nonoise -d example.com -sd
+```
+
+---
+
+### -vapi, --virustotal-api
+
+Sets or updates your VirusTotal API key.
+
+VirusTotal is used for passive subdomain discovery.
+
+Get your API key here:  
+[https://www.virustotal.com/](https://www.virustotal.com/)
+
+Example:
+
+```
+nonoise -vapi YOUR_API_KEY
+```
+
+Important:
+
+- You only need to set this once.
+    
+- The key is stored locally.
+    
+- You do NOT need to re-enter it every time you run the tool.
+    
+- Running the command again will overwrite the existing key.
+    
+
+---
+
+### -sapi, --securitytrails-api
+
+Sets or updates your SecurityTrails API key.
+
+SecurityTrails is used for additional passive subdomain discovery.
+
+Get your API key here:  
+[https://securitytrails.com/](https://securitytrails.com/)
+
+Example:
+
+```
+nonoise -sapi YOUR_API_KEY
+```
+
+Important:
+
+- You only need to set this once.
+    
+- The key is stored locally.
+    
+- Running the command again will replace the stored key.
+    
+
+---
+
+## API Key Storage
+
+API keys are stored locally in:
+
+Linux:
+
+```
+~/.config/nonoise/config.json
+```
+
+Windows:
+
+```
+%APPDATA%/nonoise/config.json
+```
+
+You can manually delete this file if you want to reset all stored keys.
+
+If API keys are not configured:
+
+- Subdomain discovery will be limited
+    
+- Some passive sources will not be used
+    
+
+---
+
+### -i, --interactive
+
+Launches guided interactive mode.
+
+Recommended for beginners and first-time users.
+
+Example:
+
+```
 nonoise --interactive
 ```
 
-### Skip Subdomains, Fast Scan
+---
 
-```bash
-nonoise -d example.com -sd -t 150
+### -h, --help
+
+Displays help menu.
+
+---
+
+### -v, --version
+
+Displays tool version.
+
+---
+
+# Domain Format Warning
+
+Enter the exact domain format you want to scan.
+
+If the target uses:
+
+```
+www.example.com
 ```
 
-## Troubleshooting
+Enter:
 
-### Common Issues
+```
+www.example.com
+```
 
-1. **Module not found**: Make sure you installed with `pip install -e .`
-2. **Permission denied**: Check file permissions on output directories
-3. **API rate limits**: Add delays or use API keys
-4. **Timeout errors**: Reduce thread count with `-t` flag
+If it uses:
 
-### Debug Mode
+```
+example.com
+```
 
-Run with Python directly to see full error traces:
+Enter:
 
-```bash
+```
+example.com
+```
+
+Incorrect format may affect subdomain discovery and URL validation.
+
+---
+
+# Output
+
+NoN0is3 generates:
+
+- `nonoise_output/`
+    
+    - `{domain}_visited.txt` (validated URLs with status codes)
+        
+- `subdomains_discovered.txt` (if enabled)
+    
+- `wordpress_results.txt` (if WordPress mode enabled)
+    
+
+---
+
+# Troubleshooting
+
+## Module Not Found
+
+Ensure:
+
+- Virtual environment is activated
+    
+- Installation completed successfully
+    
+- You are running inside the project directory (if using editable mode)
+    
+
+Activate again if needed:
+
+Linux:
+
+```
+source venv/bin/activate
+```
+
+Windows:
+
+```
+venv\Scripts\activate
+```
+
+---
+
+## Permission Denied (Kali)
+
+Do not install globally.
+
+Always use a virtual environment.
+
+---
+
+## API Keys Not Working
+
+Check:
+
+1. Did you set the key using:
+    
+    ```
+    nonoise -vapi YOUR_KEY
+    ```
+    
+    or
+    
+    ```
+    nonoise -sapi YOUR_KEY
+    ```
+    
+2. Verify the config file exists:
+    
+    ```
+    ~/.config/nonoise/config.json
+    ```
+    
+3. If needed, reset keys:
+    
+    - Delete the config.json file
+        
+    - Re-enter API keys
+        
+
+---
+
+## API Rate Limits
+
+If you see API-related errors:
+
+- Reduce thread count
+    
+- Wait before re-running
+    
+- Check your API dashboard for quota limits
+    
+
+---
+
+## Timeouts or Connection Errors
+
+Possible causes:
+
+- Thread count too high
+    
+- Network instability
+    
+- Target rate limiting
+    
+- WAF blocking automated requests
+    
+
+Solution:
+
+Lower thread count:
+
+```
+nonoise -d example.com -t 40
+```
+
+---
+
+## Command Not Found
+
+If `nonoise` command does not work:
+
+Run directly using:
+
+```
 python -m nonoise -d example.com
 ```
 
-## Contributing
+If this works, your PATH may not include the virtual environment's scripts directory.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+---
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+# Disclaimer
 
-## Wordlists
+This tool is intended for authorized security testing and educational purposes only.  
+Always obtain proper authorization before scanning any domain.
 
-Place your wordlists in the `wordlists/` directory:
+The author, ShAd0W-byte, is not responsible for misuse.
 
-- `advanced-wordlist.txt` - For URL generation
-- `wordpress-top500.txt` - For WordPress enumeration
+---
 
-## Disclaimer
+# License
 
-This tool is for educational and authorized security testing purposes only. Always obtain proper authorization before scanning any domain you don't own.
+This project is licensed under the MIT License.
 
-## Credits
+---
 
-Created by **Sh4d0w**
+# Version
 
-## License
+v0.1.0 — Initial Release
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Changelog
-
-### v0.1.0 (2025-01-16)
-- Initial release
-- Cross-platform support (Windows, Linux, macOS)
-- Passive subdomain discovery
-- Multi-source URL collection
-- Two-stage filtering system
-- WordPress enumeration
-- Concurrent processing
+---
